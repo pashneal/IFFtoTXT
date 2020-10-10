@@ -1,0 +1,61 @@
+import PySimpleGUI as sg
+import re
+from collections import OrderedDict
+from copy import deepcopy
+
+
+
+def readAsTable(filename):
+    table = []
+    with open(filename, "r") as iff_file:
+        table = [line.strip() for line in iff_file.readlines()]
+
+    table = [i.split("\t") for i in table]
+    return table
+
+def convert(filename):
+    table = readAsTable(filename)
+    i=0
+    
+    
+    values = OrderedDict([  ("Bank Account", "")
+                ("Check Number" , "ACH",),
+                ("Txn Date", ""),
+                ("Payee", "John Smith",),
+                ("Amount", ""),
+                ("To be printed", "0",),
+                ("Memo", ""),
+                ("TxnExpLine Account", ""),
+                ("TxnExpLine Amount", ""),
+                ("TxnExpLine Memo", "")
+                ("TxnExpLine Billable Status" , "0")])
+
+
+    # Find all transactions in table
+    while i < len(table):
+
+        # check to see if a transaction begins
+        while not re.match("^trns", table[i][0], flags = re.I):
+            i+=1
+
+        currentLine = table[i]
+        # Gather relevant information from start transaction line
+        currentValues = deepcopy(values)
+        currentValues["Txn Date"] = currentLine[5]
+        currentValues["Bank Account"] = currentLine[5]
+
+
+
+if __name__ ==  "__main__":
+    window = sg.Window('Convert IFF to TXT', [[sg.FileBrowse("Select File", file_types=(("IFF Files", "*.iff"),)), sg.B("Start", key="started")]])
+
+    while True:
+        event, values = window.read()
+        print(event, values)
+
+        filename = values["Select File"]
+        if filename:
+            convert(filename)
+
+        if event == sg.WIN_CLOSED or event == 'Exit':
+            break
